@@ -1,9 +1,8 @@
-# 🔥 XSS Attack Assignment
+# XSS Attack Assignment
 
-## 📌 Objective
+## Objective
 ✔ Find and exploit a **stored XSS vulnerability**.  
-✔ Inject a script to **steal session cookies**.  
-✔ Modify the server to **capture stolen cookies in the backend console**.  
+✔ Inject a script to **steal session cookies**.    
 
 ---
 
