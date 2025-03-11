@@ -10,15 +10,15 @@ app.use(bodyParser.json());
 
 let posts = []; 
 
-
+// Generate a session ID only when visiting /login
 app.get("/login", (req, res) => {
   res.clearCookie("sid");
-  const sessionId = crypto.randomUUID(); // Generate a unique session ID
+  const sessionId = crypto.randomUUID(); 
   res.cookie("sid", sessionId, { httpOnly: false }); 
   res.send(`<h1>Welcome, User ${sessionId}</h1><a href="/">Home</a>`);
 });
 
-//Endpoints:
+// Endpoints:
 
 app.get("/", (req, res) => {
   res.send(`
@@ -26,8 +26,7 @@ app.get("/", (req, res) => {
     <p><strong>Instructions:</strong></p>
     <ol>
       <li><a href="/login">Click here to Login</a> and note your session ID.</li>
-      <li>Return to this page (<a href="/">Home</a>) and try to steal it !!</li>   
-      
+      <li>Return to this page (<a href="/">Home</a>) and try to steal it!!</li>   
     </ol>
 
     <form id="postForm1">
@@ -111,14 +110,20 @@ app.get("/", (req, res) => {
 });
 
 
+
+
 app.post("/post1", (req, res) => {
   if (req.body.content) {
-    posts.push(req.body.content); 
+    const sanitizedContent = req.body.content
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    posts.push(sanitizedContent);
     res.send("Post saved!");
   } else {
     res.send("Error: Empty post!");
   }
 });
+
 
 app.post("/post2", (req, res) => {
   if (req.body.content) {
@@ -128,6 +133,7 @@ app.post("/post2", (req, res) => {
     res.send("Error: Empty post!");
   }
 });
+
 
 app.post("/post3", (req, res) => {
   if (req.body.content) {
@@ -141,14 +147,13 @@ app.post("/post3", (req, res) => {
   }
 });
 
+
 app.get("/posts", (req, res) => {
   res.setHeader("Content-Type", "text/html"); 
   res.send(posts.join("<br>")); 
 });
 
+
 app.listen(3000, () =>
   console.log("Server running on http://localhost:3000")
 );
-
-
-
