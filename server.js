@@ -8,9 +8,12 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-let posts = []; 
 
-// Generate a session ID only when visiting /login
+let profiles = [];
+let posts = [];
+let comments = [];
+
+
 app.get("/login", (req, res) => {
   res.clearCookie("sid");
   const sessionId = crypto.randomUUID(); 
@@ -18,8 +21,7 @@ app.get("/login", (req, res) => {
   res.send(`<h1>Welcome, User ${sessionId}</h1><a href="/">Home</a>`);
 });
 
-// Endpoints:
-
+//Endpoints
 app.get("/", (req, res) => {
   res.send(`
     <h1>Welcome</h1>
@@ -29,30 +31,33 @@ app.get("/", (req, res) => {
       <li>Return to this page (<a href="/">Home</a>) and try to steal it!!</li>   
     </ol>
 
-    <form id="postForm1">
-      <input type="text" id="input1" placeholder="Post something">
+    <h3>Profile</h3>
+    <form id="profileForm">
+      <input type="text" id="profileInput" placeholder="Update Profile">
       <button type="submit">Submit</button>
     </form>
 
-    <form id="postForm2">
-      <input type="text" id="input2" placeholder="Post something">
+    <h3>Posts</h3>
+    <form id="postForm">
+      <input type="text" id="postInput" placeholder="Write a Post">
       <button type="submit">Submit</button>
     </form>
 
-    <form id="postForm3">
-      <input type="text" id="input3" placeholder="Post something">
+    <h3>Comments</h3>
+    <form id="commentForm">
+      <input type="text" id="commentInput" placeholder="Leave a Comment">
       <button type="submit">Submit</button>
     </form>
 
-    <h3>Posts:</h3>
+    <h3>Submitted Content:</h3>
     <div id="posts"></div>
 
     <script>
-      document.getElementById("postForm1").addEventListener("submit", function(event) {
+      document.getElementById("profileForm").addEventListener("submit", function(event) {
         event.preventDefault();
-        const inputField = document.getElementById("input1");
+        const inputField = document.getElementById("profileInput");
 
-        fetch("/post1", {
+        fetch("/profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: inputField.value })
@@ -62,11 +67,11 @@ app.get("/", (req, res) => {
         });
       });
 
-      document.getElementById("postForm2").addEventListener("submit", function(event) {
+      document.getElementById("postForm").addEventListener("submit", function(event) {
         event.preventDefault();
-        const inputField = document.getElementById("input2");
+        const inputField = document.getElementById("postInput");
 
-        fetch("/post2", {
+        fetch("/post", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: inputField.value })
@@ -76,11 +81,11 @@ app.get("/", (req, res) => {
         });
       });
 
-      document.getElementById("postForm3").addEventListener("submit", function(event) {
+      document.getElementById("commentForm").addEventListener("submit", function(event) {
         event.preventDefault();
-        const inputField = document.getElementById("input3");
+        const inputField = document.getElementById("commentInput");
 
-        fetch("/post3", {
+        fetch("/comment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: inputField.value })
@@ -94,7 +99,7 @@ app.get("/", (req, res) => {
         fetch('/posts')
           .then(res => res.text())
           .then(html => {
-            document.getElementById("posts").innerHTML = html; 
+            document.getElementById("posts").innerHTML = html;
 
             // Ensure scripts inside posts execute
             let scripts = document.getElementById("posts").getElementsByTagName("script");
@@ -110,47 +115,43 @@ app.get("/", (req, res) => {
 });
 
 
-
-
-app.post("/post1", (req, res) => {
+app.post("/profile", (req, res) => {
   if (req.body.content) {
     const sanitizedContent = req.body.content
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
-    posts.push(sanitizedContent);
-    res.send("Post saved!");
+    profiles.push(`<p><strong>Profile:</strong> ${sanitizedContent}</p>`);
+    res.send("Profile updated!");
   } else {
-    res.send("Error: Empty post!");
+    res.send("Error: Empty input!");
   }
 });
 
-
-app.post("/post2", (req, res) => {
+app.post("/post", (req, res) => {
   if (req.body.content) {
-    posts.push(req.body.content); 
+    posts.push(`<p><strong>Post:</strong> ${req.body.content}</p>`);
     res.send("Post saved!");
   } else {
-    res.send("Error: Empty post!");
+    res.send("Error: Empty input!");
   }
 });
 
-
-app.post("/post3", (req, res) => {
+app.post("/comment", (req, res) => {
   if (req.body.content) {
     const sanitizedContent = req.body.content
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
-    posts.push(sanitizedContent);
-    res.send("Post saved!"); 
+    comments.push(`<p><strong>Comment:</strong> ${sanitizedContent}</p>`);
+    res.send("Comment saved!");
   } else {
-    res.send("Error: Empty post!");
+    res.send("Error: Empty input!");
   }
 });
 
 
 app.get("/posts", (req, res) => {
-  res.setHeader("Content-Type", "text/html"); 
-  res.send(posts.join("<br>")); 
+  res.setHeader("Content-Type", "text/html");
+  res.send([...profiles, ...posts, ...comments].join("<br>"));
 });
 
 
